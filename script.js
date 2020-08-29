@@ -1,152 +1,113 @@
-const tasksArray = [];
-
-class Task {
-	constructor(id, status, name, description, assignedTo, dueDate) {
-		this.id = id;
-		this.status = status;
-		this.name = name;
-		this.description = description;
-		this.assignedTo = assignedTo;
-		this.dueDate = dueDate;
-	}
-}
-
-class TaskManager {
-	constructor() {
-		this.currentId = tasksArray.length || 1;
-	}
-
-	getAllTasks() {
-		//let tasks = JSON.parse(this.taskList || "[]");
-		let html = "";
-		if (tasksArray.length) {
-			const renderList = tasksArray.map(function (task) {
-				html += `
-	<tr>
-		<td>${task.status}</td>
-		<td>${task.name}</td>
-		<td>${task.description}</td>
-		<td>${task.assignedTo}</td>
-		<td>${task.dueDate}</td>
-		<td><button
-		type="button" id="editTaskBtn"
-		class="btn btn-outline-warning .btn-sm"
-	  >
-		Edit
-	  </button>
-	  <button
-		type="button" 
-		class="btn btn-outline-danger .btn-sm"
-		data-toggle="modal" data-target="#confirmdelete"
-	  >
-		Delete
-	  </button>
-	  <div class="modal fade" id="confirmdelete" tabindex="-1" role="dialog" aria-hidden="true">
-	  <div class="modal-dialog" role="document">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title">Confirm</h5>
-			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-			  <span aria-hidden="true">&times;</span>
-			</button>
-		  </div>
-		  <div class="modal-body id=deleteModal">
-		   Do you want to delete task : ${task.id}
-		  </div>
-		  <div class="modal-footer">
-		  <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-		  <button type="button" id="deleteTaskBtn" class="btn btn-outline-danger" data-dismiss="modal">Delete</button>
-	  </td>
-	</tr>
-`;
-				const tableBody = document.querySelector("#tableBody");
-				const table = document.createElement(`table`);
-				const tbody = document.createElement(`tbody`);
-				table.appendChild(tbody);
-				const range = document.createRange();
-				range.selectNodeContents(tbody);
-				const taskElement = range.createContextualFragment(html);
-				tableBody.append(taskElement);
-			});
-		} else {
-			html = "";
-		}
-		return html;
-	}
-
-	addTask(status, name, description, assignedTo, dueDate) {
-		const task = new Task(
-			`task${this.currentId++}`,
-			status,
-			name,
-			description,
-			assignedTo,
-			dueDate
-		);
-		// push new task onto the tasks array
-		tasksArray.push(task);
-		console.log(tasksArray);
-	}
-
-	// Delete task Method
-	deleteTask(id) {
-		// ** find the array index which contains that id then remove from array **
-		//  ** use array.splice method here to delete then do the same as addtask to rendertasks **
-		// tasksArray = tasksArray.filter((Task) => Task.id !== id);
-		console.log("Made it to Delete Task method");
-		const task = tasksArray[1];
-		//task = task.filter((task) => task.id !== id);
-		console.log("id:", task.id);
-	}
-
-	// Update task Method
-	upadateTask(id) {}
-
-	// Assign task Method
-	assignTask(task) {}
-
-	// Gettask by status Method
-
-	getTaskByStatus() {}
-}
+import Task from "./task.js";
+import TaskManager from "./task-manager.js";
 
 // Begin DOM manipulation block
 document.addEventListener("DOMContentLoaded", function () {
 	const taskManager = new TaskManager();
 	renderTasks();
+
 	function renderTasks() {
 		//clear any exsisting HTML
 		const itemsContainer = document.getElementById("tableBody");
 		const taskList = taskManager.getAllTasks();
-		//itemsContainer.innerHTML = "";
-		itemsContainer.innerHTML = taskList;
-		// get all <i> elements within the task list and attach click event listener
 
-		let deleteTask = document.querySelectorAll("#deleteTaskBtn");
+		itemsContainer.innerHTML = taskList;
+
+		// Look for New Task button being clicked
+
+		let createBtn = document.querySelector(".createNewTaskBtn");
 
 		// loop over deletions and attach click event listener
-		const eventSetup = Array.prototype.filter.call(deleteTask, function (el) {
+		createBtn.addEventListener(
+			"click",
+			function (event) {
+				// change createTaskBtn button to be called Create new task
+
+				createTaskBtn.innerText = "Create new task";
+
+				let editId = document.querySelector(".taskId");
+				let editName = document.querySelector(".taskName");
+				let editStatus = document.querySelector(".taskStatus");
+				let editDescription = document.querySelector(".taskDescription");
+				let editAssignedTo = document.querySelector(".taskAssignedTo");
+				let editDueDate = document.querySelector(".taskDueDate");
+				editId.value = "";
+				editName.value = "";
+				editStatus.value = "";
+				editDescription.value = "";
+				editAssignedTo.value = "";
+				editDueDate.value = "";
+			},
+			false
+		);
+
+		// Look for Delete button being clicked
+
+		let deleteBtns = document.querySelectorAll(".deleteTaskBtn");
+
+		// loop over deletions and attach click event listener
+		const deleteSetup = Array.prototype.filter.call(deleteBtns, function (el) {
 			el.addEventListener(
 				"click",
 				function (event) {
-					console.log("Delete Task Confirm Button Clicked");
+					let deleteId = event.target.value;
 
-					//taskManager.deleteTask();
-					let taskElement = event.target.closest("#deleteTaskBtn");
-					console.log("task element:", taskElement.id);
-					taskManager.deleteTask(taskElement.id);
-					console.log("task element id:", taskElement.id);
+					taskManager.deleteTask(deleteId);
+
+					renderTasks();
+				},
+				false
+			);
+		});
+
+		// Look for Update button being clicked
+
+		let updateTask = document.querySelectorAll(".updateTaskBtn");
+		console.log(updateTask);
+
+		// loop over updates and attach click event listener
+		const updateSetup = Array.prototype.filter.call(updateTask, function (el) {
+			el.addEventListener(
+				"click",
+				function (event) {
+					// change createTaskBtn button to be called update task
+
+					createTaskBtn.innerText = "Update task";
+
+					let targetId = event.target.value;
+
+					let editId = document.querySelector(".taskId");
+					let editName = document.querySelector(".taskName");
+					let editStatus = document.querySelector(".taskStatus");
+					let editDescription = document.querySelector(".taskDescription");
+					let editAssignedTo = document.querySelector(".taskAssignedTo");
+					let editDueDate = document.querySelector(".taskDueDate");
+
+					// get task from array and set values
+
+					const task = taskManager.tasks.find((t) => t.id === targetId);
+					console.log("task:", task);
+
+					editId.value = task.id;
+					editName.value = task.name;
+					editStatus.value = task.status;
+					editDescription.value = task.description;
+					editAssignedTo.value = task.assignedTo;
+					editDueDate.value = task.dueDate;
+
 					renderTasks();
 				},
 				false
 			);
 		});
 	}
-
 	// Validation code for disabling form submissions if there are invalid fields
+
 	// Fetch all the forms we want to apply custom Bootstrap validation styles to
+
 	const forms = document.getElementsByClassName("needs-validation");
-	// Loop over them and prevent submission
+
+	// Loop over them and prevent submission if not valid input
 	var validation = Array.prototype.filter.call(forms, function (form) {
 		form.addEventListener(
 			"submit",
@@ -156,15 +117,31 @@ document.addEventListener("DOMContentLoaded", function () {
 				if (form.checkValidity() === false) {
 					form.classList.add("was-validated");
 				} else {
-					// define vars for each form input value
 					let status = form.taskStatus.value;
 					let name = form.taskName.value;
 					let description = form.taskDescription.value;
 					let assignedTo = form.taskAssignedTo.value;
 					let dueDate = form.taskDueDate.value;
 
-					taskManager.addTask(status, name, description, assignedTo, dueDate);
-					renderTasks();
+					// Look for taskId if there it is an update of the task
+
+					if (form.taskId.value) {
+						taskManager.updateTask(
+							form.taskId.value,
+							status,
+							name,
+							description,
+							assignedTo,
+							dueDate
+						);
+
+						renderTasks();
+					} else {
+						// Look for taskId if not there it is an add task
+
+						taskManager.addTask(status, name, description, assignedTo, dueDate);
+						renderTasks();
+					}
 				}
 			},
 			false
